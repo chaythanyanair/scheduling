@@ -153,10 +153,10 @@ def blit_times(line):
 	if 'TRnd' in line:
 		c= line.split(':')[1]
 		writetext=writefont.render("AVERAGE TURN AROUND TIME="+str(c.strip('\n')),2,[0,0,0])
-		screen.blit(writetext,[(cord_x-100),(cord_y+100)])
+		screen.blit(writetext,[50,(cord_y+100)])
 	elif 'Wait' in line:
 		writetext=writefont.render("AVERAGE WAIT TIME="+(line.split(':')[1]).strip('\n'),2,[0,0,0])
-		screen.blit(writetext,[(cord_x-100),(cord_y+150)])
+		screen.blit(writetext,[50,(cord_y+150)])
 def gantt(caption,f):
 	global count
 	global overhead_time

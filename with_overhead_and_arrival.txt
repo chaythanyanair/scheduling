@@ -1,0 +1,48 @@
+		CONSIDERING BOTH OVERHEAD AND ARRIVAL TIME
+0:p0:20:NOT COMPLETED
+20:scheduler:5
+25:p2:20:NOT COMPLETED
+45:scheduler:5
+50:p3:20:NOT COMPLETED
+70:scheduler:5
+75:p1:20:NOT COMPLETED
+95:scheduler:5
+100:p0:20:NOT COMPLETED
+120:scheduler:5
+125:p2:20:NOT COMPLETED
+145:scheduler:5
+150:p3:20:NOT COMPLETED
+170:scheduler:5
+175:p1:20:COMPLETED
+195:scheduler:5
+200:p4:20:NOT COMPLETED
+220:scheduler:5
+225:p0:20:COMPLETED
+245:scheduler:5
+250:p2:20:NOT COMPLETED
+270:scheduler:5
+275:p3:20:NOT COMPLETED
+295:scheduler:5
+300:p4:20:NOT COMPLETED
+320:scheduler:5
+325:p2:20:NOT COMPLETED
+345:scheduler:5
+350:p3:15:COMPLETED
+365:scheduler:5
+370:p4:20:NOT COMPLETED
+390:scheduler:5
+395:p2:10:COMPLETED
+405:scheduler:5
+410:p4:5:COMPLETED
+TRnd(p2) = 395
+TRnd(p3) = 315
+TRnd(p0) = 245
+TRnd(p1) = 125
+TRnd(p4) = 295
+Average TRnd time:275.0
+W(p2) = 15
+W(p3) = 0
+W(p0) = 0
+W(p1) = 5
+W(p4) = 80
+Average Wait time:20.0
