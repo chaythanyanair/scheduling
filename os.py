@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import sys
 import os.path
 
@@ -9,24 +10,24 @@ def wowa(into):
 	my_list=[]
 	for value in clist:
 		my_list.append(value.strip())
-	n=int((my_list[0].split())[2])
-	time_slot=int((my_list[1].split())[2])
-	overhead=int((my_list[2].split())[2])
-	o.write('\noverhead='+str(overhead))
-	o.write('\nslot='+str(time_slot))
+	n=int((my_list[0].split(':'))[1])
+	time_slot=int((my_list[1].split(':'))[1])
+	overhead=int((my_list[2].split(':'))[1])
+	#o.write('\noverhead='+str(overhead))
+	#o.write('\nslot='+str(time_slot))
 	turn_around={}
 	wait_time={}
 	process_list=[]
 	for value in my_list:
 		if len(value)!=0:
-			if (value.split())[0]=='PROCESS:':
+			if (value.split(':'))[0]=='PROCESS':
 				process_list.append(value)
 	
-	process_list.sort(key=lambda(x): int((x.split())[5]))
-	process_names=[(x.split())[1] for x in process_list]
-	process_times=[(x.split())[3] for x in process_list]
+	process_list.sort(key=lambda(x): int((x.split(':'))[3]))
+	process_names=[(x.split(':'))[1] for x in process_list]
+	process_times=[(x.split(':'))[2] for x in process_list]
 	process_times=[int(x) for x in process_times]
-	process_arrival=[(x.split())[5] for x in process_list]
+	process_arrival=[(x.split(':'))[3] for x in process_list]
 	process_arrival=[int(x) for x in process_arrival]
 	done=[]
 	index=0
@@ -34,12 +35,8 @@ def wowa(into):
 		done.append(True)
 	i=0
 	flag=0
-	o.write( '\n*********************************************************************\n')
-	o.write('*         TIME         PROCESS      REMAINING TIME    TURN AROUND     *\n')
-	o.write('*                                                                     *\n')
+	o.write('\t\tCONSIDERING BOTH OVERHEAD AND ARRIVAL TIME\n')
 	while i<n:
-		
-
 		while done[i]==True and index>=process_arrival[i]:
 			if not(str(process_names[i]) in wait_time):
 				c=index-process_arrival[i]
@@ -49,9 +46,9 @@ def wowa(into):
 			if(process_times[i]<time_slot):
 				index+=(process_times[i])
 				done[i]=False
-
+				o.write(str(index1)+ ':'+str(process_names[i])+':'+str(process_times[i])+':COMPLETED\n')
 				process_times[i]=0
-				o.write('*      ('+str(index1)+ ',' +str( index) +')           '+str(process_names[i])+'             '+str(process_times[i])+'               '+str(index-process_arrival[i])+'-> COMPLETED\n')
+				
 				turn_around.update({str(process_names[i]):(index-process_arrival[i])})
 				process_arrival.remove(process_arrival[i])
         	       		process_times.remove(process_times[i])
@@ -65,20 +62,25 @@ def wowa(into):
 				process_times[i]=process_times[i]-time_slot
 				if process_times[i]==0:
 				        done[i]=False
-					o.write('*      ('+str(index1)+ ',' +str( index) +')           '+str(process_names[i])+'             '+str(process_times[i])+'              '+str(index-process_arrival[i])+'-> CCOMPLETED\n')
+					o.write(str(index1)+ ':'+str(process_names[i])+':'+str(time_slot)+':COMPLETED\n')
 					turn_around.update({str(process_names[i]):(index-process_arrival[i])})
 					process_times.remove(process_times[i])
 					process_names.remove(process_names[i])
 					process_arrival.remove(process_arrival[i])
 					done.remove(done[i])
+					
 					i=i-1
 			      		n=n-1
 					flag=1
 				
 			if flag==0:
-				 o.write('*      ('+str(index1)+ ',' +str( index)+ ')           '+str(process_names[i])+'             '+str(process_times[i])+'\n')
+				 o.write(str(index1)+ ':'+str(process_names[i])+':'+str(time_slot)+':NOT COMPLETED\n')
 			i=i+1
+			if True in done:
+						o.write(str(index)+':scheduler:'+str(overhead)+'\n')
 			index=index+overhead
+			
+						
 			if i==n:
 				break
 		if i<n and index<process_arrival[i]:
@@ -90,19 +92,16 @@ def wowa(into):
 			i=i+1
 	print "\nScheduled and output written to file!\n"
 	
-	o.write(' **************************************************************')
-	o.write(str('\n\n TURN AROUND TIMES\n'))
 	for i in range(len(turn_around)):
-		o.write('T('+str(turn_around.items()[i][0])+') = '+str(turn_around.items()[i][1])+'\n')
+		o.write('TRnd('+str(turn_around.items()[i][0])+') = '+str(turn_around.items()[i][1])+'\n')
 	turn_avg=reduce(lambda x,y:x+y,turn_around.values())/float(len(turn_around))
-	o.write('\n\nTURN AVERAGE='+str(turn_avg)+'\n')
-	o.write(str('\n\n WAIT TIMES\n'))
+	o.write('Average TRnd time:'+str(turn_avg)+'\n')
 	for i in range(len(wait_time)):
 		o.write('W('+str(wait_time.items()[i][0])+') = '+str(wait_time.items()[i][1])+'\n')	
 	wait_avg=reduce(lambda x,y:x+y,wait_time.values())/float(len(wait_time))
 	for i in range(n):
 		o.write('\nW('+str(i)+') ='+str(wait_time[i]))
-	o.write('\nAVERAGE WAIT='+str(wait_avg)+'\n')
+	o.write('Average Wait time:'+str(wait_avg))
 	o.close()
 	f.close()
 						
@@ -116,20 +115,18 @@ def nona(into):
 	my_list=[]
 	for value in clist:
 		my_list.append(value.strip())
-	n=int((my_list[0].split())[2])
-	time_slot=int((my_list[1].split())[2])
-	overhead=int((my_list[2].split())[2])
-	o.write('\noverhead='+str(overhead))
-	o.write('\nslot='+str(time_slot))
+	n=int((my_list[0].split(':'))[1])
+	time_slot=int((my_list[1].split(':'))[1])
+	overhead=int((my_list[2].split(':'))[1])
 	process_list=[]
 	turn_around={}
 	wait_time={}
 	for value in my_list:
 		if len(value)!=0:
-			if (value.split())[0]=='PROCESS:':
+			if (value.split(':'))[0]=='PROCESS':
 				process_list.append(value)
-	process_names=[(x.split())[1] for x in process_list]
-	process_times=[(x.split())[3] for x in process_list]
+	process_names=[(x.split(':'))[1] for x in process_list]
+	process_times=[(x.split(':'))[2] for x in process_list]
 	process_times=[int(x) for x in process_times]
 	done=[]
 	index=0
@@ -137,9 +134,7 @@ def nona(into):
 		done.append(True)
 	i=0
 	flag=0
-	o.write( '\n*********************************************************************\n')
-	o.write('*         TIME         PROCESS      REMAINING TIME    TURN AROUND     *\n')
-	o.write('*                                                                     *\n')                                             
+	o.write('\t\tWITHOUT CONSIDERING OVERHEAD OR ARRIVAL TIME\n')                                            
 	while i<n:
 
 		while done[i]==True:
@@ -150,9 +145,8 @@ def nona(into):
 			if(process_times[i]<time_slot):
 				index+=(process_times[i])
 				done[i]=False
-
-				process_times[i]=0
-				o.write('*      ('+str(index1)+ ',' +str( index) +')           '+str(process_names[i])+'             '+str(process_times[i])+'               '+str(index)+'-> COMPLETED\n')
+				o.write(str(index1)+ ':'+str(process_names[i])+':'+str(process_times[i])+':COMPLETED\n')
+				process_times[i]=0				
 				turn_around.update({str(process_names[i]):index})
 		       		process_times.remove(process_times[i])
 				process_names.remove(process_names[i])
@@ -165,7 +159,7 @@ def nona(into):
 				process_times[i]=process_times[i]-time_slot
 				if process_times[i]==0:
 					done[i]=False
-					o.write('*      ('+str(index1)+ ',' +str( index) +')           '+str(process_names[i])+'             '+str(process_times[i])+'               '+str(index)+'-> COMPLETED\n')
+					o.write(str(index1)+ ':'+str(process_names[i])+':'+str(time_slot)+':COMPLETED\n')
 					turn_around.update({str(process_names[i]):index})
 	       	         		process_times.remove(process_times[i])
 					process_names.remove(process_names[i])
@@ -175,7 +169,7 @@ def nona(into):
 					flag=1
 				
 			if flag==0:
-				o.write('*      ('+str(index1)+ ',' +str( index) +')           '+str(process_names[i])+'             '+str(process_times[i])+'\n')
+				o.write(str(index1)+ ':'+str(process_names[i])+':'+str(time_slot)+':NOT COMPLETED\n')
 				
 			i=i+1
 			if i==n:
@@ -186,20 +180,14 @@ def nona(into):
 		else:
 			i=i+1
 	print "\nScheduled and output written to file!\n"
-	o.write(' **************************************************************')
-	o.write(str('\n\n TURN AROUND TIMES\n'))
 	for i in range(len(turn_around)):
-		o.write('T('+str(turn_around.items()[i][0])+') = '+str(turn_around.items()[i][1])+'\n')
+		o.write('TRnd('+str(turn_around.items()[i][0])+') = '+str(turn_around.items()[i][1])+'\n')
 	turn_avg=reduce(lambda x,y:x+y,turn_around.values())/float(len(turn_around))
-	o.write('\n\nTURN AVERAGE='+str(turn_avg)+'\n')
-	o.write(str('\n\n WAIT TIMES\n'))
+	o.write('Average TRnd time:'+str(turn_avg)+'\n')
 	for i in range(len(wait_time)):
 		o.write('W('+str(wait_time.items()[i][0])+') = '+str(wait_time.items()[i][1])+'\n')	
 	wait_avg=reduce(lambda x,y:x+y,wait_time.values())/float(len(wait_time))
-	for i in range(n):
-		o.write('\nW('+str(i)+') ='+str(wait_time[i]))
-		
-	o.write('\nAVERAGE WAIT='+str(wait_avg)+'\n')
+	o.write('Average Wait time:'+str(wait_avg))
 	o.close()
 	f.close()
 						
@@ -214,33 +202,26 @@ def wona(into):
 	my_list=[]
 	for value in clist:
 		my_list.append(value.strip())
-	n=int((my_list[0].split())[2])
-	time_slot=int((my_list[1].split())[2])
-	overhead=int((my_list[2].split())[2])
-	o.write('\noverhead='+str(overhead))
-	o.write('\nslot='+str(time_slot))
+	n=int((my_list[0].split(':'))[1])
+	time_slot=int((my_list[1].split(':'))[1])
+	overhead=int((my_list[2].split(':'))[1])
 	process_list=[]
 	turn_around={}
 	wait_time={}
 	for value in my_list:
 		if len(value)!=0:
-			if (value.split())[0]=='PROCESS:':
+			if (value.split(':'))[0]=='PROCESS':
 				process_list.append(value)
-	
-	process_names=[(x.split())[1] for x in process_list]
-	process_times=[(x.split())[3] for x in process_list]
+	process_names=[(x.split(':'))[1] for x in process_list]
+	process_times=[(x.split(':'))[2] for x in process_list]
 	process_times=[int(x) for x in process_times]
-	process_arrival=[(x.split())[5] for x in process_list]
-	process_arrival=[int(x) for x in process_arrival]
 	done=[]
 	index=0
 	for i in range(n):
 		done.append(True)
 	i=0
 	flag=0
-	o.write( '\n*********************************************************************\n')
-	o.write('*         TIME         PROCESS      REMAINING TIME    TURN AROUND     *\n')
-	o.write('*                                                                     *\n') 
+	o.write('\t\tCONSIDERING OVERHEAD BUT NOT ARRIVAL TIME\n') 
 	while i<n:
 
 		while done[i]==True:
@@ -251,8 +232,8 @@ def wona(into):
 			if(process_times[i]<time_slot):
 				index+=(process_times[i])
 				done[i]=False
+				o.write(str(index1)+ ':'+str(process_names[i])+':'+str(process_times[i])+':COMPLETED\n')
 				process_times[i]=0
-				o.write('*      ('+str(index1)+ ',' +str( index) +')           '+str(process_names[i])+'             '+str(process_times[i])+'               '+str(index)+'-> COMPLETED\n')
 				turn_around.update({str(process_names[i]):index})
 				process_times.remove(process_times[i])
 				process_names.remove(process_names[i])
@@ -265,7 +246,7 @@ def wona(into):
 				process_times[i]=process_times[i]-time_slot
 				if process_times[i]==0:
 				        done[i]=False
-					o.write('*      ('+str(index1)+ ',' +str( index) +')           '+str(process_names[i])+'             '+str(process_times[i])+'               '+str(index)+'->COMPLETED\n')
+					o.write(str(index1)+ ':'+str(process_names[i])+':'+str(time_slot)+':COMPLETED\n')
 					turn_around.update({str(process_names[i]):index})
 					process_times.remove(process_times[i])
 					process_names.remove(process_names[i])
@@ -275,9 +256,11 @@ def wona(into):
 					flag=1
 				
 			if flag==0:
-				o.write('*      ('+str(index1)+ ',' +str( index) +')           '+str(process_names[i])+'             '+str(process_times[i])+'\n')
+				o.write(str(index1)+ ':'+str(process_names[i])+':'+str(time_slot)+':NOT COMPLETED\n')
 				
 			i=i+1
+			if True in done:
+						o.write(str(index)+':scheduler:'+str(overhead)+'\n')
 			index=index+overhead
 			if i==n:
 				break
@@ -288,20 +271,14 @@ def wona(into):
 			i=i+1
 			
 	print "\nScheduled and output written to file!\n"						
-	o.write(' **************************************************************')
-	o.write(str('\n\n TURN AROUND TIMES\n'))
 	for i in range(len(turn_around)):
-		o.write('T('+str(turn_around.items()[i][0])+') = '+str(turn_around.items()[i][1])+'\n')
+		o.write('TRnd('+str(turn_around.items()[i][0])+') = '+str(turn_around.items()[i][1])+'\n')
 	turn_avg=reduce(lambda x,y:x+y,turn_around.values())/float(len(turn_around))
-	o.write('\n\nTURN AVERAGE='+str(turn_avg)+'\n')
-	o.write(str('\n\n WAIT TIMES\n'))
+	o.write('Average TRnd time:'+str(turn_avg)+'\n')
 	for i in range(len(wait_time)):
 		o.write('W('+str(wait_time.items()[i][0])+') = '+str(wait_time.items()[i][1])+'\n')	
 	wait_avg=reduce(lambda x,y:x+y,wait_time.values())/float(len(wait_time))
-	for i in range(n):
-		o.write('\nW('+str(i)+') ='+str(wait_time[i]))
-		
-	o.write('\nAVERAGE WAIT='+str(wait_avg)+'\n')
+	o.write('Average Wait time:'+str(wait_avg))
 	o.close()
 	f.close()
 def nowa(into):
@@ -312,23 +289,21 @@ def nowa(into):
 	my_list=[]
 	for value in clist:
 		my_list.append(value.strip())
-	n=int((my_list[0].split())[2])
-	time_slot=int((my_list[1].split())[2])
-	overhead=int((my_list[2].split())[2])
-	o.write('\noverhead='+str(overhead))
-	o.write('\nslot='+str(time_slot))
+	n=int((my_list[0].split(':'))[1])
+	time_slot=int((my_list[1].split(':'))[1])
+	overhead=int((my_list[2].split(':'))[1])
 	process_list=[]
 	turn_around={}
 	wait_time={}
 	for value in my_list:
 		if len(value)!=0:
-			if (value.split())[0]=='PROCESS:':
+			if (value.split(':'))[0]=='PROCESS':
 				process_list.append(value)
-	process_list.sort(key=lambda(x): int((x.split())[5]))
-	process_names=[(x.split())[1] for x in process_list]
-	process_times=[(x.split())[3] for x in process_list]
+	process_list.sort(key=lambda(x): int((x.split(':'))[3]))
+	process_names=[(x.split(':'))[1] for x in process_list]
+	process_times=[(x.split(':'))[2] for x in process_list]
 	process_times=[int(x) for x in process_times]
-	process_arrival=[(x.split())[5] for x in process_list]
+	process_arrival=[(x.split(':'))[3] for x in process_list]
 	process_arrival=[int(x) for x in process_arrival]
 	done=[]
 	index=0
@@ -336,9 +311,7 @@ def nowa(into):
 		done.append(True)
 	i=0
 	flag=0
-	o.write( '\n*********************************************************************\n')
-	o.write('*         TIME         PROCESS      REMAINING TIME    TURN AROUND     *\n')
-	o.write('*                                                                     *\n') 
+	o.write('\t\tWITHOUT CONSIDERING OVERHEAD BUT ARRIVAL TIME\n')
 	while i<n:
 
 		while done[i]==True and index>= process_arrival[i]:
@@ -350,9 +323,8 @@ def nowa(into):
 			if(process_times[i]<time_slot):
 				index+=(process_times[i])
 				done[i]=False
-
+				o.write(str(index1)+ ':'+str(process_names[i])+':'+str(process_times[i])+':COMPLETED\n')
 				process_times[i]=0
-				o.write('*      ('+str(index1)+ ',' +str( index) +')           '+str(process_names[i])+'             '+str(process_times[i])+'               '+str(index-process_arrival[i])+'->COMPLETED\n')
 				turn_around.update({str(process_names[i]):(index-process_arrival[i])})
 				process_times.remove(process_times[i])
 				process_names.remove(process_names[i])
@@ -366,7 +338,7 @@ def nowa(into):
 				process_times[i]=process_times[i]-time_slot
 				if process_times[i]==0:
 				        done[i]=False
-					o.write('*      ('+str(index1)+ ',' +str( index) +')           '+str(process_names[i])+'             '+str(process_times[i])+'               '+str(index-process_arrival[i])+'-> COMPLETED\n')
+					o.write(str(index1)+ ':'+str(process_names[i])+':'+str(time_slot)+':COMPLETED\n')
 					turn_around.update({str(process_names[i]):(index-process_arrival[i])})
 					process_times.remove(process_times[i])
 					process_names.remove(process_names[i])
@@ -377,7 +349,7 @@ def nowa(into):
 					flag=1
 				
 			if flag==0:
-				o.write('*      ('+str(index1)+ ',' +str( index) +')           '+str(process_names[i])+'             '+str(process_times[i])+'\n')
+				o.write(str(index1)+ ':'+str(process_names[i])+':'+str(time_slot)+':NOT COMPLETED\n')
 				
 			i=i+1
 			if i==n:
@@ -390,20 +362,14 @@ def nowa(into):
 		else:
 			i=i+1
 	print "\nScheduled and output written to file!\n"
-	o.write(' **************************************************************')
-	o.write(str('\n\n TURN AROUND TIMES\n'))
 	for i in range(len(turn_around)):
-		o.write('T('+str(turn_around.items()[i][0])+') = '+str(turn_around.items()[i][1])+'\n')
+		o.write('TRnd('+str(turn_around.items()[i][0])+') = '+str(turn_around.items()[i][1])+'\n')
 	turn_avg=reduce(lambda x,y:x+y,turn_around.values())/float(len(turn_around))
-	o.write('\n\nTURN AVERAGE='+str(turn_avg)+'\n')
-	o.write(str('\n\n WAIT TIMES\n'))
+	o.write('Average TRnd time:'+str(turn_avg)+'\n')
 	for i in range(len(wait_time)):
 		o.write('W('+str(wait_time.items()[i][0])+') = '+str(wait_time.items()[i][1])+'\n')	
 	wait_avg=reduce(lambda x,y:x+y,wait_time.values())/float(len(wait_time))
-	for i in range(n):
-		o.write('\nW('+str(i)+') ='+str(wait_time[i]))
-		
-	o.write('\nAVERAGE WAIT='+str(wait_avg)+'\n')
+	o.write('Average Wait time:'+str(wait_avg))
 	o.close()
 	f.close()
 if __name__=="__main__" :
