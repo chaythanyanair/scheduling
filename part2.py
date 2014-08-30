@@ -4,14 +4,10 @@ from pygame.locals import *
 import os.path
 import random
 pygame.init()
-black=(0,0,0)
-white=(255,255,255)
-red=(255,0,0)
-green=(0,255,0)
-blue=(0,0,255)
 size=[1000,600]
 clock = pygame.time.Clock()
-verdana= pygame.font.match_font('Arial')
+white=(255,255,255)
+black=(0,0,0)
 headfont=pygame.font.Font(None,30)
 writefont=pygame.font.Font(None,25)
 screen = pygame.display.set_mode(size)
@@ -186,7 +182,6 @@ def gantt(caption,f):
 						process_list.append((line.split(':'))[1])
 				for i in range(len(process_list)):
 					color_dict.update({process_list[i]:color_list[i]})
-	
 	for line in Page_lines:
 			if ':' in line and not('time' in line):
 				if 'scheduler' in line:
@@ -199,7 +194,6 @@ def gantt(caption,f):
 				
 			if 'time' in line:
 				blit_times(line)
-		
 	name=(caption.split('.'))[0]
 	name=name.replace('_',' ')	
 	headtext=headfont.render(str((name.split('.'))[0]),1,[0,0,0])
@@ -211,9 +205,7 @@ def gantt(caption,f):
         			pygame.quit()
             			sys.exit()
             			break
-            	pygame.display.update()
-            
-		
+            	pygame.display.update()	
 if __name__=="__main__" :
 	if len(sys.argv) >2:
 		raise Exception("Too Many Arguments Passed")
